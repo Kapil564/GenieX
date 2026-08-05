@@ -1,8 +1,8 @@
 {
-  "name": "telegrambot-ci-demo",
+  "name": "geniex-bot",
   "version": "1.0.0",
   "type": "module",
-  "description": "Demo Express API for learning GitHub Actions CI/CD",
+  "description": "GenieX automation bot that finds AI news or matching GitHub commits and posts them to X.",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
@@ -15,7 +15,8 @@
   "license": "ISC",
   "dependencies": {
     "dotenv": "^17.4.2",
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "telegraf": "^4.12.3"
   },
   "devDependencies": {}
 }

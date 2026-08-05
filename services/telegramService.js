@@ -16,7 +16,9 @@ export async function registerTelegramCommands(token) {
 
   const result = await response.json();
   if (!result.ok) {
-    throw new Error(result.description || "Telegram command registration failed");
+    throw new Error(
+      result.description || "Telegram command registration failed",
+    );
   }
 
   return result;

@@ -1,6 +1,6 @@
-# Telegram Bot CI/CD Demo
+# GenieX
 
-A lightweight Express API designed as a learning project for GitHub Actions CI/CD.
+GenieX is an automated bot that searches today’s top AI news, matches it to your mood or career line, and can post it to X or share GitHub commit updates.
 
 This repository includes:
 
