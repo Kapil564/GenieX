@@ -1,0 +1,21 @@
+{
+  "name": "telegrambot-ci-demo",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Demo Express API for learning GitHub Actions CI/CD",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "node --test",
+    "lint": "echo \"No lint step configured\"",
+    "prepare": "npm install"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1"
+  },
+  "devDependencies": {}
+}
