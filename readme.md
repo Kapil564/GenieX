@@ -1,29 +1,33 @@
-# GenieX
+# Telegram Storage Bot
 
-GenieX is an automated bot that searches today’s top AI news, matches it to your mood or career line, and can post it to X or share GitHub commit updates.
+This project creates a Telegram bot that stores text, photos, and videos locally and lets you retrieve them later.
 
-This repository includes:
+## Features
 
-- A simple Node.js/Express HTTP API
-- A service layer for bot-related logic
-- Automated tests using Node's built-in test runner
-- A GitHub Actions workflow that installs dependencies and runs tests on push and pull requests
+- Save text messages
+- Save photos and videos
+- Retrieve items by name or ID
+- List all saved items
+
+## Setup
+
+1. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+2. Create a Telegram bot with BotFather and copy its token.
+3. Create a `.env` file from `.env.example` and set your token:
+   ```bash
+   copy .env.example .env
+   ```
+4. Run the bot:
+   ```bash
+   python bot.py
+   ```
 
 ## Commands
 
-- `npm install`
-- `npm start`
-- `npm run dev`
-- `npm test`
-
-## API
-
-- `GET /about` — project metadata
-- `GET /commands?cmd=/help` — bot commands and usage
-- `GET /telegram/register` — register bot commands with Telegram using `TELEGRAM_BOT_TOKEN`
-
-## Learning goals
-
-- Practice GitHub Actions workflow configuration
-- Validate Node.js app behavior with automated tests
-- Learn basic repo structure for CI/CD-ready apps
+- `/start` - show help
+- `/save <name>` - prepare the next message/media to store
+- `/list` - list saved items
+- `/get <name-or-id>` - retrieve a stored item
