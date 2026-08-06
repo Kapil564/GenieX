@@ -132,12 +132,7 @@ def main() -> None:
     application.add_handler(CommandHandler("save", save_command))
     application.add_handler(CommandHandler("list", list_command))
     application.add_handler(CommandHandler("get", get_command))
-    application.add_handler(
-        MessageHandler(
-            filters.TEXT | filters.PHOTO | filters.VIDEO | filters.DOCUMENT | filters.AUDIO | filters.VOICE,
-            handle_message,
-        )
-    )
+    application.add_handler(MessageHandler(filters.ALL, handle_message))
 
     try:
         application.run_polling(allowed_updates=["message"])
