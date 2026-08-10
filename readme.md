@@ -35,7 +35,7 @@ Just **send a message normally** — the bot auto-captures it.
 
 ---
 
-## Setup
+## Local Setup
 
 1. Install dependencies:
    ```bash
@@ -50,7 +50,7 @@ Just **send a message normally** — the bot auto-captures it.
    cp .env.example .env
    ```
    Then paste your token:
-   ```
+   ```bash
    TELEGRAM_TOKEN=your_bot_token_here
    ```
 
@@ -58,6 +58,70 @@ Just **send a message normally** — the bot auto-captures it.
    ```bash
    python bot.py
    ```
+
+---
+
+## Deploy on Render (Free Tier)
+
+Render's free web services spin down after inactivity. **Polling bots die** because the long-running connection is dropped. Use **webhooks** instead: Telegram calls your Render URL whenever someone messages the bot, and Render wakes the service to handle it.
+
+### 1. Create a Render Web Service
+
+1. Push this repo to GitHub (already done).
+2. Go to [render.com](https://render.com) → **New +** → **Web Service**.
+3. Connect your GitHub repository (`Kapil564/GenieX`).
+4. Use these settings:
+
+| Field | Value |
+|-------|-------|
+| **Name** | `geniex-bot` (or anything) |
+| **Environment** | `Python 3` |
+| **Build Command** | `pip install -r requirements.txt` |
+| **Start Command** | `python bot.py` |
+| **Plan** | Free |
+
+### 2. Set Environment Variables
+
+In Render → your service → **Environment** → add:
+
+| Key | Value |
+|-----|-------|
+| `TELEGRAM_TOKEN` | Your bot token from @BotFather |
+| `WEBHOOK_HOST` | `https://geniex-bot-xxx.onrender.com` (your Render URL) |
+| `WEBHOOK_SECRET` | A random secret string (optional but recommended) |
+
+You can leave `PORT` blank — Render sets it automatically.
+
+The bot will detect `WEBHOOK_HOST` and switch to webhook mode automatically.
+
+### 3. Set Telegram Webhook
+
+After the service is live, run this once to tell Telegram where to send updates:
+
+```bash
+BOT_TOKEN="your_bot_token"
+WEBHOOK_URL="https://geniex-bot-xxx.onrender.com/webhook/$BOT_TOKEN"
+
+curl -X POST "https://api.telegram.org/bot$BOT_TOKEN/setWebhook" \
+  -H "Content-Type: application/json" \
+  -d "{\"url\":\"$WEBHOOK_URL\"}"
+```
+
+To verify:
+
+```bash
+curl "https://api.telegram.org/bot$BOT_TOKEN/getWebhookInfo"
+```
+
+### 4. Switch Back to Polling (Local Dev)
+
+Just unset `WEBHOOK_HOST` and run `python bot.py`. The bot falls back to polling.
+
+To delete the webhook manually:
+
+```bash
+curl "https://api.telegram.org/bot<token>/deleteWebhook"
+```
 
 ---
 
@@ -77,6 +141,10 @@ Just **send a message normally** — the bot auto-captures it.
 - All data lives in `data/brain.db` (SQLite).
 - Voice transcription is handled locally by Whisper — no cloud API call.
 - Media files themselves are stored as Telegram file IDs, not downloaded locally (which keeps storage small and retrieval fast).
+
+> ⚠️ On Render free tier, the filesystem is ephemeral. If the service restarts, `data/brain.db` is lost. For persistence, consider:
+> - Mounting a [Render Disk](https://render.com/docs/disks) (paid)
+> - Switching to a hosted database like [Supabase Postgres](https://supabase.com) or [SQLite on Turso](https://turso.tech)
 
 ---
 

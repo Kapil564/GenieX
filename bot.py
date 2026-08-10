@@ -1,8 +1,9 @@
+import asyncio
 import logging
 import os
 import re
 import tempfile
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Optional
 from urllib.parse import urlparse
 
@@ -10,6 +11,7 @@ from dotenv import load_dotenv
 from telegram import Update
 from telegram.error import Conflict
 from telegram.ext import (
+    Application,
     ApplicationBuilder,
     CommandHandler,
     ContextTypes,
@@ -29,6 +31,13 @@ logging.basicConfig(
 TOKEN = os.getenv("TELEGRAM_TOKEN")
 if not TOKEN:
     raise RuntimeError("Set TELEGRAM_TOKEN in your environment or .env file")
+
+# Render / production webhook settings
+PORT = int(os.getenv("PORT", "8443"))
+WEBHOOK_HOST = os.getenv("WEBHOOK_HOST", "")
+WEBHOOK_PATH = os.getenv("WEBHOOK_PATH", f"/webhook/{TOKEN}")
+WEBHOOK_URL = os.getenv("WEBHOOK_URL", "")
+WEBHOOK_SECRET = os.getenv("WEBHOOK_SECRET", "")
 
 store = BrainStore()
 
@@ -142,7 +151,6 @@ async def delete_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         await update.message.reply_text("Usage: /delete <note-id>")
         return
 
-    # Accept either raw integer or #yymmdd-HHMM
     note_id = raw.lstrip("#")
     if note_id.isdigit():
         deleted = store.delete_note(int(note_id), _user_id(update))
@@ -339,7 +347,7 @@ async def _send_notes(update: Update, notes: list) -> None:
     await update.message.reply_text(text, parse_mode="Markdown", disable_web_page_preview=True)
 
 
-def main() -> None:
+def build_application() -> Application:
     application = ApplicationBuilder().token(TOKEN).build()
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("today", today_command))
@@ -349,9 +357,27 @@ def main() -> None:
     application.add_handler(CommandHandler("random", random_command))
     application.add_handler(CommandHandler("delete", delete_command))
     application.add_handler(MessageHandler(filters.ALL, handle_message))
+    return application
+
+
+def main() -> None:
+    application = build_application()
+
+    # Choose polling vs webhook based on environment
+    webhook_url = WEBHOOK_URL or (f"{WEBHOOK_HOST.rstrip('/')}{WEBHOOK_PATH}" if WEBHOOK_HOST else "")
 
     try:
-        application.run_polling(allowed_updates=["message"])
+        if webhook_url:
+            logging.info("Starting webhook on %s port %s", webhook_url, PORT)
+            application.run_webhook(
+                listen="0.0.0.0",
+                port=PORT,
+                webhook_url=webhook_url,
+                secret_token=WEBHOOK_SECRET or None,
+            )
+        else:
+            logging.info("Starting polling mode")
+            application.run_polling(allowed_updates=["message"])
     except Conflict as exc:
         logging.error("Another bot instance is already running: %s", exc)
         raise
